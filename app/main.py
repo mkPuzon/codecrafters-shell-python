@@ -5,14 +5,12 @@ import subprocess
         
 class Shell:
     
-    __path: list[str] = []
-    
     def __init__(self) -> None:
-        self.__path = os.environ["PATH"].split(":")
         self.builtin_commands= {
             "echo": self.echo,
             "exit": self.exit,
-            "type": self.type
+            "type": self.type,
+            "pwd": self.pwd
             }
 
     def exit(self, args: list[str]) -> None:
@@ -29,6 +27,9 @@ class Shell:
             print(f"{cmd} is {path}")
         else:
             print(f"{cmd}: not found")
+    
+    def pwd(self, args: list[str]):
+        print(os.getcwd())
 
     def __run_external(self, path: str, args: list[str]):
         try:
