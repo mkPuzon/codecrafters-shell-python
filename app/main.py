@@ -32,7 +32,8 @@ class Shell:
 
     def __run_external(self, path: str, args: list[str]):
         try:
-            subprocess.run([path] + args)
+            cmd = path.split("/")[-1]
+            subprocess.run([cmd] + args)
         except Exception as e:
             print(f"Error executing {path}: {e}")
         
