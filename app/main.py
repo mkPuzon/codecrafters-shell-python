@@ -1,30 +1,67 @@
+import os
 import sys
 import shutil
+import subprocess
         
-def main():
-    builtin_commands = ["echo", "type", "exit"]
-    while True:
-        sys.stdout.write("$ ")
-        command = input()
+class Shell:
+    
+    __path: list[str] = []
+    
+    def __init__(self) -> None:
+        self.__path = os.environ["PATH"].split(":")
+        self.builtin_commands= {
+            "echo": self.echo,
+            "exit": self.exit,
+            "type": self.type
+            }
 
-        if command == "exit":
-            break
+    def exit(self, args: list[str]) -> None:
+        sys.exit(0)
 
-        elif command.startswith("echo "):
-            print(command[5:])
+    def echo(self, args: list[str]) -> None:
+        print(" ".join(args))
 
-        elif command.startswith("type "):
-            cmd_arg = command[5:]
-            if cmd_arg in builtin_commands:
-                print(f"{command[5:]} is a shell builtin")
-            elif path := shutil.which(cmd_arg):
-                print(f"{cmd_arg} is {path}")
-            else:
-                print(f"{command[5:]}: not found")
-
-
+    def type(self, args: list[str]) -> None:
+        cmd = args[0]
+        if cmd in self.builtin_commands:
+            print(f"{cmd} is a shell builtin")
+        elif path := shutil.which(cmd):
+            print(f"{cmd} is {path}")
         else:
-            print(f"{command}: command not found")
+            print(f"{cmd}: not found")
+
+    def __run_external(self, path: str, args: list[str]):
+        try:
+            subprocess.run([path] + args)
+        except Exception as e:
+            print(f"Error executing {path}: {e}")
+        
+    def run(self):
+        """Main shell REPL loop."""
+        while True:
+            sys.stdout.write("$ ")
+            sys.stdout.flush()
+            
+            user_input = input().strip()
+            if not user_input:
+                continue
+
+            cmd_args = user_input.split(" ")
+            cmd = cmd_args[0]
+            args = cmd_args[1:]
+
+            if cmd in self.builtin_commands:
+                self.builtin_commands[cmd](args)
+
+            elif path := shutil.which(cmd):
+                self.__run_external(path, args)
+                
+            else:
+                print(f"{cmd}: command not found")
+            
+def main():
+    s = Shell()
+    s.run()
 
 if __name__ == "__main__":
     main()
