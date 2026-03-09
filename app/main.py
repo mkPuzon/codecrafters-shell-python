@@ -2,15 +2,20 @@ import os
 import sys
 import shutil
 import subprocess
-        
+from pathlib import Path
+
 class Shell:
     
     def __init__(self) -> None:
-        self.builtin_commands= {
+        
+        self.working_directory: Path = Path.cwd()
+        self.builtin_commands = {
             "echo": self.echo,
             "exit": self.exit,
             "type": self.type,
-            "pwd": self.pwd
+            "pwd": self.pwd,
+            "cd": self.cd,
+            "ls": self.ls
             }
 
     def exit(self, args: list[str]) -> None:
@@ -29,7 +34,19 @@ class Shell:
             print(f"{cmd}: not found")
     
     def pwd(self, args: list[str]):
-        print(os.getcwd())
+        print(self.working_directory)
+
+    def cd(self, args: list[str]):
+        if target := Path(args[0]):
+            if target.is_absolute():
+                self.working_directory = target
+            else:
+                self.working_directory = os.path.join(self.working_directory, target)
+        else:
+            print(f"cd: {args[0]}: No such file or directory.")
+
+    def ls(self, args: list[str]):
+        print(os.listdir(self.working_directory))
 
     def __run_external(self, path: str, args: list[str]):
         try:
