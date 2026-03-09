@@ -37,7 +37,8 @@ class Shell:
         print(self.working_directory)
 
     def cd(self, args: list[str]):
-        if target := Path(args[0]):
+        target = Path(args[0])
+        if target.exists():
             if target.is_absolute():
                 self.working_directory = target
             else:
