@@ -44,7 +44,7 @@ class Shell:
             else:
                 self.working_directory = os.path.join(self.working_directory, target)
         else:
-            print(f"cd: {args[0]}: No such file or directory.")
+            print(f"cd: {args[0]}: No such file or directory")
 
     def ls(self, args: list[str]):
         print(os.listdir(self.working_directory))
