@@ -44,8 +44,12 @@ class LSCommand(Command):
 class CDCommand(Command):
 
     def execute(self, args: list[str], shell_state: Shell) -> None:
-        target = Path(args[0]).resolve()
+        target = Path(args[0]).expanduser().resolve()
         if target.exists():
+            shell_state.working_directory = target
+            os.chdir(target)
+        elif args[0] == "~":
+            target = os.getenv('HOME')
             shell_state.working_directory = target
             os.chdir(target)
         else:
