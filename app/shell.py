@@ -27,6 +27,10 @@ class Shell:
                 redirect_mode = "w"
                 redirect_file = user_input[i + 1]
                 break
+            elif token == "2>":
+                redirect_mode = "w"
+                redirect_file = user_input[i + 1]
+                break
             elif token == ">>":
                 pass
             else:
