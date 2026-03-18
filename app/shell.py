@@ -66,6 +66,9 @@ class Shell:
             
             try: # get user input
                 user_input: list[str] = shlex.split(input()) 
+                if not user_input:
+                    continue
+
                 cmd, args, redirect_file, redirect_mode = self.__parse_input(user_input=user_input)
             except KeyboardInterrupt: # ctrl + c
                 sys.stdout.write("\n")
@@ -74,13 +77,9 @@ class Shell:
                 sys.stderr.write(f"Invalid argument: {e}\n")
                 continue
                 
-            # ignore empty lines
-            if not user_input:
-                continue
-
             if redirect_file:
-                with open(redirect_file, redirect_mode) as sys.stdout:
-                    self.__run_command(cmd=cmd, args=args)
+                with open(redirect_file, redirect_mode) as f:
+                    self.__run_command(cmd=cmd, args=args, stdout_file=f)
             else:
                 self.__run_command(cmd=cmd, args=args)
 

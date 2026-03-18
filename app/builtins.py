@@ -38,7 +38,11 @@ class PWDCommand(Command):
 class LSCommand(Command):
 
     def execute(self, args: list[str], shell_state: Shell) -> None:
-        sys.stdout.write(str(os.listdir(shell_state.working_directory)) + "\n")
+        if "-1" in args:
+            for f in os.listdir(shell_state.working_directory):
+                sys.stdout.write(str(f) + "\n")
+        else:
+            sys.stdout.write(str(os.listdir(shell_state.working_directory)) + "\n")
 
 @register_command("cd")
 class CDCommand(Command):
