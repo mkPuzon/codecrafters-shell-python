@@ -1,0 +1,13 @@
+pyproject.toml
+.gitattributes
+.python-version
+app
+.gitignore
+.codecrafters
+uv.lock
+.venv
+codecrafters.yml
+tmp
+README.md
+your_program.sh
+.git

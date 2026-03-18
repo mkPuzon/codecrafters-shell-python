@@ -38,9 +38,16 @@ class PWDCommand(Command):
 class LSCommand(Command):
 
     def execute(self, args: list[str], shell_state: Shell) -> None:
-        if "-1" in args:
-            for f in os.listdir(shell_state.working_directory):
-                sys.stdout.write(str(f) + "\n")
+        
+        if len(args) > 0:
+            path = os.path.join(shell_state.working_directory, args[-1])
+
+            if "-1" in args:
+                args.remove("-1")
+                for f in os.listdir(path):
+                    sys.stdout.write(str(f) + "\n")
+            else:
+                sys.stdout.write(str(os.listdir(path)) + "\n")
         else:
             sys.stdout.write(str(os.listdir(shell_state.working_directory)) + "\n")
 
