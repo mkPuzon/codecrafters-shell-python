@@ -2,7 +2,7 @@ import sys
 import shlex
 import shutil
 import subprocess
-from pathlib import Path
+from pathlib import Path, PurePath
 from contextlib import redirect_stdout
 
 import app.builtins 
@@ -37,7 +37,8 @@ class Shell:
 
     def __run_external(self, path: str, args: list[str], stdout_file=None) -> None:
         try:
-            subprocess.run([path, *args], stdout=stdout_file)
+            cmd = PurePath(path).name
+            subprocess.run([cmd, *args], stdout=stdout_file)
         except Exception as e:
             sys.stderr.write(f"Error executing {path}: {e}\n")
 
