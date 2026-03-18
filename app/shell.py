@@ -90,8 +90,7 @@ class Shell:
                 continue
                 
             if redirect_file:
-                with open(redirect_file, redirect_mode) as f:
-                    self.__run_command(cmd=cmd, args=args, stdout_file=self.stdout, stderr_file=self.stderr)
+                self.__run_command(cmd=cmd, args=args, stdout=self.stdout, stderr=self.stderr)
             else:
                 self.__run_command(cmd=cmd, args=args)
 
