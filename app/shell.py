@@ -14,10 +14,6 @@ class Shell:
         self.working_directory: Path = Path.cwd()
         self.BUILTINS = BUILTIN_COMMANDS
 
-        self.stdout = sys.stdout
-        self.stdin = sys.stdin
-        self.stderr = sys.stderr
-
     def __parse_input(self, user_input: list[str]) -> tuple[str, list[str], str | None, str | None]:
         cmd: str = user_input[0]
         args: list[str] = []
@@ -29,13 +25,8 @@ class Shell:
             token = user_input[i]
             if token in (">", "1>"):
                 redirect_mode = "w"
-                redirect_file = True
-                self.stdout = user_input[i + 1]
+                redirect_file = user_input[i + 1]
                 break
-            elif token == "2>":
-                redirect_mode = 'w'
-                redirect_file = True
-                self.stderr = user_input[i + 1]
             elif token == ">>":
                 pass
             else:
@@ -44,25 +35,25 @@ class Shell:
         
         return cmd, args, redirect_file, redirect_mode
 
-    def __run_external(self, path: str, args: list[str]) -> None:
+    def __run_external(self, path: str, args: list[str], stdout_file=None) -> None:
         try:
             cmd = PurePath(path).name
-            subprocess.run([cmd, *args], stdout=self.stdout, stderr=self.stderr)
+            subprocess.run([cmd, *args], stdout=stdout_file)
         except Exception as e:
             sys.stderr.write(f"Error executing {path}: {e}\n")
 
-    def __run_command(self, cmd: str, args: list[str]) -> None:
+    def __run_command(self, cmd: str, args: list[str], stdout_file=None) -> None:
         # check if a custom builtin command
         if cmd in self.BUILTINS:
-            if self.stdout_file:
-                with redirect_stdout(self.stdout_file):
+            if stdout_file:
+                with redirect_stdout(stdout_file):
                     self.BUILTINS[cmd].execute(args, self)
             else:
                 self.BUILTINS[cmd].execute(args, self)
 
         # check if a path to this program exists
         elif path := shutil.which(cmd):
-            self.__run_external(path=path, args=args, stdout_file=self.stdout_file)
+            self.__run_external(path=path, args=args, stdout_file=stdout_file)
 
         # program is not a builtin and not on the machine's path
         else:
@@ -80,20 +71,18 @@ class Shell:
                     continue
 
                 cmd, args, redirect_file, redirect_mode = self.__parse_input(user_input=user_input)
-
             except KeyboardInterrupt: # ctrl + c
                 sys.stdout.write("\n")
                 sys.exit(0)
-
             except ValueError as e: # usually unmatched quotations around args
                 sys.stderr.write(f"Invalid argument: {e}\n")
                 continue
                 
             if redirect_file:
-                self.__run_command(cmd=cmd, args=args, stdout=self.stdout, stderr=self.stderr)
+                with open(redirect_file, redirect_mode) as f:
+                    self.__run_command(cmd=cmd, args=args, stdout_file=f)
             else:
                 self.__run_command(cmd=cmd, args=args)
 
             # restore stdout to terminal
-            self.stdout = sys.__stdout__
-            self.stderr = sys.__stderr__
+            sys.stdout = sys.__stdout__
