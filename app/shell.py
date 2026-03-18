@@ -33,8 +33,12 @@ class Shell:
                 stderr_file = user_input[i + 1]
                 redirect_mode = "w"
                 break
-            elif token == ">>":
-                pass
+            elif token in (">>", "1>>"):
+                stdout_file = user_input[i + 1]
+                redirect_mode = "a"
+            elif token == "2>>":
+                stderr_file = user_input[i + 1]
+                redirect_mode = "a"
             else:
                 args.append(token)
             i += 1
