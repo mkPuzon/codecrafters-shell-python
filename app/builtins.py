@@ -14,7 +14,7 @@ class ExitCommand(Command):
 class EchoCommand(Command):
     
     def execute(self, args: list[str], shell_state: Shell) -> None:
-        print(" ".join(args))
+        sys.stdout.write(" ".join(args) + "\n")
 
 @register_command("type")
 class TypeCommand(Command):
@@ -22,23 +22,23 @@ class TypeCommand(Command):
     def execute(self, args: list[str], shell_state: Shell) -> None:
         cmd = args[0]
         if cmd in shell_state.BUILTINS:
-            print(f"{cmd} is a shell builtin")
+            sys.stdout.write(f"{cmd} is a shell builtin\n")
         elif path := shutil.which(cmd):
-            print(f"{cmd} is {path}")
+            sys.stdout.write(f"{cmd} is {path}\n")
         else:
-            print(f"{cmd}: not found")
+            sys.stdout.write(f"{cmd}: not found\n")
 
 @register_command("pwd")
 class PWDCommand(Command):
     
     def execute(self, args: list[str], shell_state: Shell) -> None:
-        print(shell_state.working_directory)
+        sys.stdout.write(str(shell_state.working_directory) + "\n")
 
 @register_command("ls")
 class LSCommand(Command):
 
     def execute(self, args: list[str], shell_state: Shell) -> None:
-        print(os.listdir(shell_state.working_directory))
+        sys.stdout.write(str(os.listdir(shell_state.working_directory)) + "\n")
 
 @register_command("cd")
 class CDCommand(Command):
@@ -53,4 +53,4 @@ class CDCommand(Command):
             shell_state.working_directory = target
             os.chdir(target)
         else:
-            print(f"cd: {args[0]}: No such file or directory")
+            sys.stdout.write(f"cd: {args[0]}: No such file or directory\n")
