@@ -1,3 +1,4 @@
+import os
 import sys
 import shlex
 import shutil
@@ -37,6 +38,12 @@ class Shell:
             else:
                 args.append(token)
             i += 1
+
+        # ensure the stdout & stderr files exist
+        if stdout_file: 
+            Path(stdout_file).parent.mkdir(parents=True, exist_ok=True)
+        if stderr_file: 
+            Path(stderr_file).parent.mkdir(parents=True, exist_ok=True)
         
         return cmd, args, stdout_file, stderr_file, redirect_mode 
 
@@ -54,6 +61,7 @@ class Shell:
     def __run_command(self, cmd: str, args: list[str], stdout_file=None, stderr_file=None) -> None:
         # check if a custom builtin command
         if cmd in self.BUILTINS:
+
             with ExitStack() as stack:
                 if stdout_file:
                     stack.enter_context(redirect_stdout(stdout_file))
@@ -64,7 +72,7 @@ class Shell:
 
         # check if a path to this program exists
         elif path := shutil.which(cmd):
-            self.__run_external(path=path, args=args, stdout_file=stdout_file)
+            self.__run_external(path=path, args=args, stdout_file=stdout_file, stderr_file=stderr_file)
 
         # program is not a builtin and not on the machine's path
         else:
