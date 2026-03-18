@@ -34,23 +34,6 @@ class PWDCommand(Command):
     def execute(self, args: list[str], shell_state: Shell) -> None:
         sys.stdout.write(str(shell_state.working_directory) + "\n")
 
-@register_command("ls")
-class LSCommand(Command):
-
-    def execute(self, args: list[str], shell_state: Shell) -> None:
-        
-        if len(args) > 0:
-            path = os.path.join(shell_state.working_directory, args[-1])
-
-            if "-1" in args:
-                args.remove("-1")
-                for f in os.listdir(path):
-                    sys.stdout.write(str(f) + "\n")
-            else:
-                sys.stdout.write(str(os.listdir(path)) + "\n")
-        else:
-            sys.stdout.write(str(os.listdir(shell_state.working_directory)) + "\n")
-
 @register_command("cd")
 class CDCommand(Command):
 
