@@ -15,41 +15,44 @@ class Shell:
         self.working_directory: Path = Path.cwd()
         self.BUILTINS = BUILTIN_COMMANDS
 
-    def __parse_input(self, user_input: list[str]) -> tuple[str, list[str], str | None, str | None]:
+    def __parse_input(self, user_input: list[str]) -> tuple[str, list[str], str | None, str | None, str | None, str | None]:
         cmd: str = user_input[0]
         args: list[str] = []
         stdout_file = None
         stderr_file = None
-        redirect_mode = None 
+        stdout_redirect_mode = None
+        stderr_redirect_mode = None
 
         i = 1
         while i < len(user_input):
             token = user_input[i]
             if token in (">", "1>"):
                 stdout_file = user_input[i + 1]
-                redirect_mode = "w"
-                break
+                stdout_redirect_mode = "w"
+                i += 2
             elif token == "2>":
                 stderr_file = user_input[i + 1]
-                redirect_mode = "w"
-                break
+                stderr_redirect_mode = "w"
+                i += 2
             elif token in (">>", "1>>"):
                 stdout_file = user_input[i + 1]
-                redirect_mode = "a"
+                stdout_redirect_mode = "a"
+                i += 2
             elif token == "2>>":
                 stderr_file = user_input[i + 1]
-                redirect_mode = "a"
+                stderr_redirect_mode = "a"
+                i += 2
             else:
                 args.append(token)
-            i += 1
+                i += 1
 
         # ensure the stdout & stderr files exist
-        if stdout_file: 
+        if stdout_file:
             Path(stdout_file).parent.mkdir(parents=True, exist_ok=True)
-        if stderr_file: 
+        if stderr_file:
             Path(stderr_file).parent.mkdir(parents=True, exist_ok=True)
-        
-        return cmd, args, stdout_file, stderr_file, redirect_mode 
+
+        return cmd, args, stdout_file, stderr_file, stdout_redirect_mode, stderr_redirect_mode
 
     def __run_external(self, path: str, args: list[str], stdout_file=None, stderr_file=None) -> None:
         try:
@@ -97,7 +100,7 @@ class Shell:
                 if not user_input:
                     continue
 
-                cmd, args, stdout_path, stderr_path, redirect_mode = self.__parse_input(user_input=user_input)
+                cmd, args, stdout_path, stderr_path, stdout_mode, stderr_mode = self.__parse_input(user_input=user_input)
             except KeyboardInterrupt: # ctrl + c
                 sys.stdout.write("\n")
                 sys.exit(0)
@@ -106,7 +109,7 @@ class Shell:
                 continue
                 
             with ExitStack() as stack:
-                stdout_f = stack.enter_context(open(stdout_path, redirect_mode)) if stdout_path else None
-                stderr_f = stack.enter_context(open(stderr_path, redirect_mode)) if stderr_path else None
+                stdout_f = stack.enter_context(open(stdout_path, stdout_mode)) if stdout_path else None
+                stderr_f = stack.enter_context(open(stderr_path, stderr_mode)) if stderr_path else None
 
                 self.__run_command(cmd=cmd, args=args, stdout_file=stdout_f, stderr_file=stderr_f)
